@@ -1,82 +1,93 @@
 from ipd_classes import inpoda
-from IPython import display
+import re
 
 # affiche un menu
 def printMenu(options: list[str]):
-    output = '\n'.join(options)
-    print(f"MENU :\n{output}\n")
+    for i, option in enumerate(options):
+        print(f"({i}) {option}")
 
-# affiche un message et attend que l'utilisateur appuie sur entrée
-def printPause(msg: str):
-    print(msg)
-    input("Appuyez sur Entrée pour continuer")
- 
-ipd = inpoda("./tweets.json")
-#df = ipd.getDF()
-#print(df)
-ipd.test_everything()
+def inputNum() -> str:
+    try:
+        out = re.sub(r"[^\d]", "", input("Votre choix > "))
+    except:
+        return '0'
+    return out
 
-if __name__ == "__mai__":
+if __name__ == "__main__":
     ipd = inpoda("./tweets.json")
 
-    menus = {
-        "main": [
-            "(0) Quitter",
-            "(1) Menu Tops",
-            "(2) Menu Extra"
-        ],
-        "tops": [
-            "(0) Menu Principal",
-            "(1 [k]) Top k hashtags",
-            "(2 [k]) Top k utilisateurs",
-            "(3 [k]) Top k utilisateurs mentionnés",
-            "(4 [k]) Top K topics",
-        ],
-        "extra": [
-            "(0) Menu Principal",
-            "(1 ID) Nombre de publications par utilisateurs",
-            "(2 h) Nombre de publications par hashtag",
-            "(3 t) Nombre de publications par topic",
-            "(4 ID) Ensemble des publications d'un utilisateur",
-            "(5 ID) Ensemble des publications mentionnant un utilisateur",
-            "(6)",
-            "(7)",
-        ]
-    }
+    menus = [
+        "Quitter l'application",
+        "Menu des classements",
+        "Nombre de publication en fonction de x",
+        "Publications par auteur",
+        "Publications par utilisateur mentionné",
+        "Auteurs par hashtags",
+        "Auteurs par utilisateur mentionné"
+    ]
 
     stop = False
 
     # boucle principale
     while stop == False:
-        printMenu(menus["main"])
-        saisie = input("Veuillez saisir votre choix :\n")
-        saisie = saisie.strip().split(" ")
-
-        choix = saisie[0]
-        if len(saisie) > 1:
-            option = saisie[1]
-        else:
-            option = ""
+        printMenu(menus)
+        choix = inputNum()
 
         match choix:
             case '0':
                 stop = True
                 break
             case '1':
-                ipd.listPosts()
-                input("Appuyez sur Entrée pour continuer")
+                submenu = [
+                    "Revenir au menu principal",
+                    "Top k des hashtags",
+                    "Top k des auteurs",
+                    "Top k des utilisateurs mentionnés",
+                    "Top k des topics"
+                ]
+                printMenu(submenu)
+                subchoix = inputNum()
+                match subchoix:
+                    case '1':
+                        ipd.topHashtags()
+                    case '2':
+                        ipd.topUsers()
+                    case '3':
+                        ipd.topMentionned()
+                    case '4':
+                        ipd.topTopics()
+                    case _:
+                        pass
             case '2':
-                index = int(option)
-                printPause(f"L'auteur du post n°{index} est : {ipd.getAuteur(index)}")
+                submenu = [
+                    "Revenir au menu principal",
+                    "Nombre de publications par auteur",
+                    "Nombre de publications par hashtags",
+                    "Nombre de publications par topics"
+                ]
+                printMenu(submenu)
+                subchoix = inputNum()
+                match subchoix:
+                    case '1':
+                        ipd.countPostByUser()
+                    case '2':
+                        ipd.countPostByHashtags()
+                    case '3':
+                        ipd.countPostByTopics()
+                    case _:
+                        pass
             case '3':
-                index = int(option)
-                printPause(f"Liste des hashtags du post n°{index} :\n{ipd.getHashtags(index)}")
+                ipd.postsByUsers()
+                input("Appuyez sur entrée..")
             case '4':
-                index = int(option)
-                printPause(f"Liste des utilisateurs mentionnés du post n°{index} :\n{ipd.getMentionned(index)}")
+                ipd.postsByMentions()
+                input("Appuyez sur entrée..")
             case '5':
-                index = int(option)
-                printPause(f"Le post n°{index} est {ipd.getSentiment(index)}")
+                ipd.auteursByHashtags()
+                input("Appuyez sur entrée..")
+            case '6':
+                ipd.mentionnedByUser()
+                input("Appuyez sur entrée..")
             case _:
                 print("Argument Invalide")
                 pass
